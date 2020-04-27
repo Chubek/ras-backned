@@ -1,0 +1,38 @@
+resources:
+  - type: storage.v1.bucket
+    name: sls-resume-as-a-service-backend-dev-1581947904252
+  - type: cloudfunctions.v1beta2.function
+    name: resume-as-a-service-backend-dev-render
+    properties:
+      location: us-central1
+      availableMemoryMb: 1024
+      runtime: nodejs10
+      timeout: 30s
+      function: render
+      sourceArchiveUrl: >-
+        gs://sls-resume-as-a-service-backend-dev-1581947904252/serverless/resume-as-a-service-backend/dev/1582021765906-2020-02-18T10:29:25.906Z/resume-as-a-service-backend.zip
+      environmentVariables:
+        RENDERED_RESUME_DATA_STORAGE: rendered-resume-data-storage-bucket
+      labels: {}
+      httpsTrigger:
+        url: path
+  - type: cloudfunctions.v1beta2.function
+    name: resume-as-a-service-backend-dev-assets
+    properties:
+      location: us-central1
+      availableMemoryMb: 128
+      runtime: nodejs10
+      timeout: 5s
+      function: assets
+      sourceArchiveUrl: >-
+        gs://sls-resume-as-a-service-backend-dev-1581947904252/serverless/resume-as-a-service-backend/dev/1582021765906-2020-02-18T10:29:25.906Z/resume-as-a-service-backend.zip
+      environmentVariables:
+        RENDERED_RESUME_DATA_STORAGE: rendered-resume-data-storage-bucket
+      labels: {}
+      httpsTrigger:
+        url: path
+  - type: storage.v1.bucket
+    name: rendered-resume-data-storage-bucket
+    properties:
+      project: app-project-246419
+      name: rendered-resume-data-storage-bucket

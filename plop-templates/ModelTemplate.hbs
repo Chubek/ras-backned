@@ -1,0 +1,18 @@
+/* Authored by Chubak Bidpaa: chubakbidpaa@gmail.com --- April 2020, Corona Times */
+
+require("dotenv").config({ path: appRoot + "/.env" });
+const mongoose = require("mongoose");
+const mongooseFieldEncryption = require("mongoose-field-encryption")
+.fieldEncryption;
+const Schema = mongoose.Schema;
+
+const PlaceholderSchema = new Schema({
+
+})
+
+PlaceholderSchema.plugin(mongooseFieldEncryption, {
+fields: ["email", "number", "otp.password"],
+secret: process.env.MONGOOSE_ENCRYPT_SECRET,
+});
+
+module.exports = mongoose.model("Placeholder", PlaceholderSchema);

@@ -1,0 +1,46 @@
+service: backend
+
+provider:
+  name: google
+  region: us-central1
+  runtime: nodejs
+  project: resume-as-a-service
+  credentials: ./.gcloud/keyfile.json # path must be absolute
+  environment:
+    RENDERED_RESUME_DATA_STORAGE: ${self:custom.renderedResumeDataStorage}
+
+plugins:
+  - serverless-google-cloudfunctions
+
+package:
+  exclude:
+    - node_modules/**
+    - .gitignore
+    - .git/**
+
+custom:
+  renderedResumeDataStorage: rendered-resume-data-storage
+
+functions:
+  render:
+    runtime: 'nodejs10'
+    handler: render
+    memorySize: 1024
+    timeout: 30s
+    events:
+      - http: path
+  assets:
+    runtime: 'nodejs10'
+    handler: assets
+    memorySize: 128
+    timeout: 5s
+    events:
+      - http: path
+     
+resources:
+  resources:
+    - type: storage.v1.bucket
+      name: ${self:custom.renderedResumeDataStorage}
+      properties:
+        project: ${self:provider.project}
+        name: ${self:custom.renderedResumeDataStorage}
