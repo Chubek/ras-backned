@@ -1,10 +1,10 @@
 /* Authored by Chubak Bidpaa: chubakbidpaa@gmail.com --- April 2020, Corona Times */
 
-require("dotenv").config({ path: appRoot + "/.env" });
+require("dotenv");
 const router = require("express").Router();
-const CryptoJS = require("crypto-js");
 const ResumeSchema = require("../Model");
 const jwt = require("jsonwebtoken");
+const UserAuth = require("../../../middleware/UserAuth");
 
 //GETs
 
@@ -25,7 +25,7 @@ router.get("/get/single/:resumeId", UserAuth, (req, res) => {
     });
 });
 
-router.get("/get/multiple/q", [UserAuth, AdminAuthSchema], (req, res) => {
+router.get("/get/multiple/q", UserAuth, (req, res) => {
   const resumeIds = req.query.resumeIds;
 
   ResumeSchema.findOne({ _id: { $in: resumeIds } })
@@ -582,7 +582,6 @@ router.put("/append/volunteering/:resumeId", UserAuth, (req, res) => {
       res.sendStatus(500);
     });
 });
-
 
 router.put("/restore/to/capture/:resumeId", UserAuth, (req, res) => {
   const resumeId = req.params.resumeId;
