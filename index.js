@@ -5,16 +5,12 @@
  */
 
 "use strict";
+require("dotenv").config();
 const render = require("./api/render");
 const assets = require("./api/assets");
 const app = require("./server");
 const colors = require("colors");
 
-const port = 8000;
-
-app.listen(port, () =>
-  console.error(`Server started on port ${port}`.blue.inverse)
-);
-
 exports.render = render;
 exports.assets = assets;
+exports.app = app;

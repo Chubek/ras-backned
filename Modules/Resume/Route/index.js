@@ -57,7 +57,7 @@ router.get("/get/multiple/q", UserAuth, (req, res) => {
 //POSTs
 
 router.post("/create", UserAuth, (req, res) => {
-  const userId = req.user.id;
+  const userId = req["user-id"];
   const resumeName = req.body.resumeName;
 
   if (!resumeName) {

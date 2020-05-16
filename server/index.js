@@ -21,17 +21,13 @@ app.use(
   })
 );
 
-const db = mongoose
-  .connect(
-    "mongodb://" +
-      process.env.DB_HOST +
-      ":" +
-      process.env.DB_PORT +
-      "/" +
-      process.env.DB_NAME,
-    { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
-  )
-  .then(() => console.error("MongoDB Connected".green.inverse))
+mongoose
+  .connect("mongodb://localhost:27017/resume-as-service", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  })
+  .then(() => console.log("MongoDB Connected".green.inverse))
   .catch((e) => console.error(`${e}`.underline.red));
 mongoose.set("useFindAndModify", false);
 
@@ -42,5 +38,11 @@ app.use("/resume", require("../modules/resume/route"));
 /*app.get("/", function(req, res) {
 res.sendFile("index.html", { root: path.join(__dirname, "dist") });
 });*/
+
+const port = 8000;
+
+app.listen(port, () =>
+  console.log(`Server started on port ${port}`.blue.inverse)
+);
 
 module.exports = app;

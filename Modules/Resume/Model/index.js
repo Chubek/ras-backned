@@ -4,7 +4,6 @@ require("dotenv");
 const mongoose = require("mongoose");
 const jumblator = require("mongoose-jumblator").fieldEncryptionPlugin;
 const Schema = mongoose.Schema;
-
 const ResumeSchema = new Schema({
   createdInfo: {
     userId: String,
@@ -32,7 +31,7 @@ const ResumeSchema = new Schema({
   editCaptures: [
     {
       editDate: Date,
-      capture: ResumeSchema,
+      capture: this,
     },
   ],
   contactInfo: {
@@ -229,8 +228,9 @@ const ResumeSchema = new Schema({
   ],
 });
 
-ResumeSchema.plugin(jumblator, {  
-  secret: process.env.MONGOOSE_ENCRYPT_SECRET,
+ResumeSchema.plugin(jumblator, {
+  secret: "T3St4n0w!!##", //use dotenv during production
 });
 
-module.exports = mongoose.model("Resume", ResumeSchema);
+module.exports =
+  mongoose.models.Resume || mongoose.model("Resume", ResumeSchema);

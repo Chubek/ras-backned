@@ -1,7 +1,12 @@
 /* Authored by Chubak Bidpaa: chubakbidpaa@gmail.com --- April 2020, Corona Times */
 
 const admin = require("firebase-admin");
-List;
+var serviceAccount = require("../services/googleAdmin/google-services-test.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https:/resumeasservice.firebaseio.com",
+});
 
 function UserAuth(req, res, next) {
   const token = req.header("x-auth-token");
@@ -11,10 +16,10 @@ function UserAuth(req, res, next) {
 
   admin
     .auth()
-    .verifyIdToken(idToken)
+    .verifyIdToken(token)
     .then((decodedToken) => {
       const uid = decodedToken.uid;
-      req.user.id = uid;
+      req["user-id"] = uid;
       next();
     })
     .catch((e) => {

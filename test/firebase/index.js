@@ -1,3 +1,4 @@
+
 const firebase = require("firebase/app");
 require("firebase/auth");
 require("firebase/firestore");
@@ -26,20 +27,44 @@ function signUp(email, password) {
     });
 }
 
-function signIn(email, password) {
-  firebase
-    .auth()
-    .signInWithEmailAndPassword(email, password)
-    .catch(function (error) {
-      console.error(error);
-    });
+async function signIn(email, password) {
+  return new Promise((resolve, reject) => {
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .then(() => resolve("loggedIn"))
+      .catch(function (error) {
+        reject(error);
+        console.error(error);
+      });
+  });
 }
 
-async function getToken() {
-  return await firebase.auth().currentUser.getIdToken(true);
+function getToken() {
+  return new Promise((resolve, reject) => {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        user
+          .getIdToken(true)
+          .then((idToken) => {
+            resolve(idToken);
+          })
+          .catch((e) => reject(e));
+      } else {
+        console.error("No user signed in.");
+      }
+    });
+  });
+}
+
+async function signInAndGetToken(email, password) {
+  setUp();
+  await signIn(email, password);
+  return await getToken();
 }
 
 exports.setUp = setUp;
 exports.signIn = signIn;
 exports.getToken = getToken;
 exports.signUp = signUp;
+exports.signInAndGetToken = signInAndGetToken;
