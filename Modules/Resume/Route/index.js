@@ -25,6 +25,23 @@ router.get("/get/single/:resumeId", UserAuth, (req, res) => {
     });
 });
 
+router.get("/get/all/", UserAuth, (req, res) => {
+  const userId = req["user-id"];
+
+  ResumeSchema.find({ "createdInfo.userId": userId })
+    .then((resumeDocs) => {
+      if (!resumeDocs) {
+        res.sendStatus(404);
+        return false;
+      }
+      res.status(200).json({ resumeDocs });
+    })
+    .catch((e) => {
+      console.error(e);
+      res.sendStatus(500);
+    });
+});
+
 router.get("/get/multiple/q", UserAuth, (req, res) => {
   const resumeIds = req.query.resumeIds;
 
@@ -118,29 +135,23 @@ router.put("/set/contacts/:resumeId", UserAuth, (req, res) => {
   ResumeSchema.findOneAndUpdate(
     { _id: resumeId },
     {
-      $set: {
-        contactInfo: {
-          firstName: firstName,
-          lastName: lastName,
-          phoneNumber: phoneNumber,
-          emailAddress: emailAddress,
-          city: city,
-          state: state,
-          zipCode: zipCode,
-        },
-      },
+      "contactInfo.firstName": firstName,
+      "contactInfo.lastName": lastName,
+      "contactInfo.phoneNumber": phoneNumber,
+      "contactInfo.emailAddress": emailAddress,
+      "contactInfo.city": city,
+      "contactInfo.state": state,
+      "contactInfo.zipCode": zipCode,
     }
   )
     .then((oldResume) => {
       ResumeSchema.findOneAndUpdate(
         { _id: resumeId },
         {
-          $set: {
-            $push: {
-              editCaptures: {
-                editDate: new Date(),
-                capture: oldResume,
-              },
+          $push: {
+            editCaptures: {
+              editDate: new Date(),
+              capture: oldResume,
             },
           },
         }
@@ -173,11 +184,9 @@ router.put("/set/summary/:resumeId", UserAuth, (req, res) => {
     { _id: resumeId },
     {
       $set: {
-        $push: {
-          objective: { $each: objective },
-          summary: { $each: summary },
-          bluf: { $each: bluf },
-        },
+        objective: objective,
+        summary: summary,
+        bluf: bluf,
       },
     }
   )
@@ -185,16 +194,14 @@ router.put("/set/summary/:resumeId", UserAuth, (req, res) => {
       ResumeSchema.findOneAndUpdate(
         { _id: resumeId },
         {
-          $set: {
-            $push: {
-              editCaptures: {
-                editDate: new Date(),
-                capture: oldResume,
-              },
+          $push: {
+            editCaptures: {
+              editDate: new Date(),
+              capture: oldResume,
             },
           },
         }
-      ).then(() => res.status(200).json({ resmeUpdated: true }));
+      ).then(() => res.status(200).json({ resumeUpdated: true }));
     })
     .catch((e) => {
       console.error("Data not entered!");
@@ -212,7 +219,49 @@ router.put("/append/history/:resumeId", UserAuth, (req, res) => {
     datesTo,
     dutiesAndTasks,
   } = req.body;
+  const edit = req.body.edit === "true" ? true : false;
+  const del = req.body.delete === "true" ? true : false;
+  const index = req.body.index;
 
+  if (edit) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        [`historyExperience.${index}`]: {
+          companyName: companyName,
+          location: location,
+          datesFrom: datesFrom,
+          datesTo: datesTo,
+          $push: { dutiesAndTasks: { $each: dutiesAndTasks } },
+        },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexUpdated: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
+  if (del) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        $unset: { [`historyExperience.${index}`]: 1 },
+        $pull: { historyExperience: null },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexDeleted: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
   ResumeSchema.findOne({ _id: resumeId }).then((resumeDoc) => {
     if (!resumeDoc) {
       console.error("No such resume! " + resumeId);
@@ -230,15 +279,13 @@ router.put("/append/history/:resumeId", UserAuth, (req, res) => {
   ResumeSchema.findOneAndUpdate(
     { _id: resumeId },
     {
-      $set: {
-        $push: {
-          historyExperience: {
-            companyName: companyName,
-            location: location,
-            datesFrom: datesFrom,
-            datesTo: datesTo,
-            $push: { dutiesAndTasks: { $each: dutiesAndTasks } },
-          },
+      $push: {
+        historyExperience: {
+          companyName: companyName,
+          location: location,
+          datesFrom: datesFrom,
+          datesTo: datesTo,
+          $push: { dutiesAndTasks: { $each: dutiesAndTasks } },
         },
       },
     }
@@ -267,7 +314,47 @@ router.put("/append/history/:resumeId", UserAuth, (req, res) => {
 router.put("/append/techskills/:resumeId", UserAuth, (req, res) => {
   const resumeId = req.params.resumeId;
   const { skillName, skillProficiency, skillImportance } = req.body;
+  const edit = req.body.edit === "true" ? true : false;
+  const del = req.body.delete === "true" ? true : false;
+  const index = req.body.index;
 
+  if (edit) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        [`technicalSkills.${index}`]: {
+          skillName: skillName,
+          skillProficiency: skillProficiency,
+          skillImportance: skillImportance,
+        },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexUpdated: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
+  if (del) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        $unset: { [`technicalSkills.${index}`]: 1 },
+        $pull: { technicalSkills: null },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexDeleted: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
   ResumeSchema.findOne({ _id: resumeId }).then((resumeDoc) => {
     if (!resumeDoc) {
       console.error("No such resume! " + resumeId);
@@ -300,12 +387,10 @@ router.put("/append/techskills/:resumeId", UserAuth, (req, res) => {
       ResumeSchema.findOneAndUpdate(
         { _id: resumeId },
         {
-          $set: {
-            $push: {
-              editCaptures: {
-                editDate: new Date(),
-                capture: oldResume,
-              },
+          $push: {
+            editCaptures: {
+              editDate: new Date(),
+              capture: oldResume,
             },
           },
         }
@@ -320,7 +405,47 @@ router.put("/append/techskills/:resumeId", UserAuth, (req, res) => {
 router.put("/append/softwareskills/:resumeId", UserAuth, (req, res) => {
   const resumeId = req.params.resumeId;
   const { softwareName, skillProficiency, skillImportance } = req.body;
+  const edit = req.body.edit === "true" ? true : false;
+  const del = req.body.delete === "true" ? true : false;
+  const index = req.body.index;
 
+  if (edit) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        [`softwareSkills.${index}`]: {
+          softwareName: softwareName,
+          skillProficiency: skillProficiency,
+          skillImportance: skillImportance,
+        },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexUpdated: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
+  if (del) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        $unset: { [`softwareSkills.${index}`]: 1 },
+        $pull: { softwareSkills: null },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexDeleted: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
   ResumeSchema.findOne({ _id: resumeId }).then((resumeDoc) => {
     if (!resumeDoc) {
       console.error("No such resume! " + resumeId);
@@ -353,12 +478,10 @@ router.put("/append/softwareskills/:resumeId", UserAuth, (req, res) => {
       ResumeSchema.findOneAndUpdate(
         { _id: resumeId },
         {
-          $set: {
-            $push: {
-              editCaptures: {
-                editDate: new Date(),
-                capture: oldResume,
-              },
+          $push: {
+            editCaptures: {
+              editDate: new Date(),
+              capture: oldResume,
             },
           },
         }
@@ -373,7 +496,47 @@ router.put("/append/softwareskills/:resumeId", UserAuth, (req, res) => {
 router.put("/append/degrees/:resumeId", UserAuth, (req, res) => {
   const resumeId = req.params.resumeId;
   const { almaMater, degree, dateEarned } = req.body;
+  const edit = req.body.edit === "true" ? true : false;
+  const del = req.body.delete === "true" ? true : false;
+  const index = req.body.index;
 
+  if (edit) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        [`degrees.${index}`]: {
+          almaMater: almaMater,
+          degree: degree,
+          dateEarned: dateEarned,
+        },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexUpdated: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
+  if (del) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        $unset: { [`degrees.${index}`]: 1 },
+        $pull: { degrees: null },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexDeleted: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
   ResumeSchema.findOne({ _id: resumeId }).then((resumeDoc) => {
     if (!resumeDoc) {
       console.error("No such resume! " + resumeId);
@@ -406,12 +569,10 @@ router.put("/append/degrees/:resumeId", UserAuth, (req, res) => {
       ResumeSchema.findOneAndUpdate(
         { _id: resumeId },
         {
-          $set: {
-            $push: {
-              editCaptures: {
-                editDate: new Date(),
-                capture: oldResume,
-              },
+          $push: {
+            editCaptures: {
+              editDate: new Date(),
+              capture: oldResume,
             },
           },
         }
@@ -423,10 +584,51 @@ router.put("/append/degrees/:resumeId", UserAuth, (req, res) => {
     });
 });
 
-router.put("append/certs/:resumeId", UserAuth, (req, res) => {
+router.put("/append/certs/:resumeId", UserAuth, (req, res) => {
   const resumeId = req.params.resumeId;
   const { certName, grantedBy, dateEarned, dateExpires } = req.body;
+  const edit = req.body.edit === "true" ? true : false;
+  const del = req.body.delete === "true" ? true : false;
+  const index = req.body.index;
 
+  if (edit) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        [`certifications.${index}`]: {
+          certName: certName,
+          grantedBy: grantedBy,
+          dateEarned: dateEarned,
+          dateExpires: dateExpires,
+        },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexUpdated: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
+  if (del) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        $unset: { [`certifications.${index}`]: 1 },
+        $pull: { certifications: null },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexDeleted: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
   ResumeSchema.findOne({ _id: resumeId }).then((resumeDoc) => {
     if (!resumeDoc) {
       console.error("No such resume! " + resumeId);
@@ -460,12 +662,10 @@ router.put("append/certs/:resumeId", UserAuth, (req, res) => {
       ResumeSchema.findOneAndUpdate(
         { _id: resumeId },
         {
-          $set: {
-            $push: {
-              editCaptures: {
-                editDate: new Date(),
-                capture: oldResume,
-              },
+          $push: {
+            editCaptures: {
+              editDate: new Date(),
+              capture: oldResume,
             },
           },
         }
@@ -477,10 +677,50 @@ router.put("append/certs/:resumeId", UserAuth, (req, res) => {
     });
 });
 
-router.put("append/awards/:resumeId", UserAuth, (req, res) => {
+router.put("/append/awards/:resumeId", UserAuth, (req, res) => {
   const resumeId = req.params.resumeId;
   const { awardName, awardCompany, dateEarned } = req.body;
+  const edit = req.body.edit === "true" ? true : false;
+  const del = req.body.delete === "true" ? true : false;
+  const index = req.body.index;
 
+  if (edit) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        [`awards.${index}`]: {
+          awardName: awardName,
+          awardCompany: awardCompany,
+          dateEarned: dateEarned,
+        },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexUpdated: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
+  if (del) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        $unset: { [`awards.${index}`]: 1 },
+        $pull: { awards: null },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexDeleted: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
   ResumeSchema.findOne({ _id: resumeId }).then((resumeDoc) => {
     if (!resumeDoc) {
       console.error("No such resume! " + resumeId);
@@ -513,12 +753,10 @@ router.put("append/awards/:resumeId", UserAuth, (req, res) => {
       ResumeSchema.findOneAndUpdate(
         { _id: resumeId },
         {
-          $set: {
-            $push: {
-              editCaptures: {
-                editDate: new Date(),
-                capture: oldResume,
-              },
+          $push: {
+            editCaptures: {
+              editDate: new Date(),
+              capture: oldResume,
             },
           },
         }
@@ -533,7 +771,47 @@ router.put("append/awards/:resumeId", UserAuth, (req, res) => {
 router.put("/append/volunteering/:resumeId", UserAuth, (req, res) => {
   const resumeId = req.params.resumeId;
   const { orgName, tasksCompleted, dates } = req.body;
+  const edit = req.body.edit === "true" ? true : false;
+  const del = req.body.delete === "true" ? true : false;
+  const index = req.body.index;
 
+  if (edit) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        [`volunteering.${index}`]: {
+          orgName: orgName,
+          $push: { tasksCompleted: { $each: tasksCompleted } },
+          $push: { dates: { $each: dates } },
+        },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexUpdated: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
+  if (del) {
+    ResumeSchema.findOneAndUpdate(
+      { _id: resumeId },
+      {
+        $unset: { [`volunteering.${index}`]: 1 },
+        $pull: { volunteering: null },
+      }
+    )
+      .then(() => {
+        res.status(200).json({ indexDeleted: index });
+      })
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+    return false;
+  }
   ResumeSchema.findOne({ _id: resumeId }).then((resumeDoc) => {
     if (!resumeDoc) {
       console.error("No such resume! " + resumeId);
@@ -566,12 +844,10 @@ router.put("/append/volunteering/:resumeId", UserAuth, (req, res) => {
       ResumeSchema.findOneAndUpdate(
         { _id: resumeId },
         {
-          $set: {
-            $push: {
-              editCaptures: {
-                editDate: new Date(),
-                capture: oldResume,
-              },
+          $push: {
+            editCaptures: {
+              editDate: new Date(),
+              capture: oldResume,
             },
           },
         }
@@ -585,7 +861,7 @@ router.put("/append/volunteering/:resumeId", UserAuth, (req, res) => {
 
 router.put("/restore/to/capture/:resumeId", UserAuth, (req, res) => {
   const resumeId = req.params.resumeId;
-  const { restoreDate } = req.body;
+  const { restoreId } = req.body;
 
   ResumeSchema.findOne({ _id: resumeId })
     .then((resumeDoc) => {
@@ -597,11 +873,16 @@ router.put("/restore/to/capture/:resumeId", UserAuth, (req, res) => {
 
       let restoreDoc = null;
 
-      resumeDoc.editCaptures.forEach((edit) => {
-        if (edit.editDate === restoreDate) {
-          restoreDate = edit.capture;
+      resumeDoc.editCaptures.forEach((edit) => {        
+        if (edit._id == restoreId) {          
+          restoreDoc = edit.capture;
         }
       });
+
+      if (!restoreDoc) {
+        res.status(404).json({ editCaptureNotFound: true });
+        return false;
+      }
 
       ResumeSchema.findOneAndUpdate(
         { _id: resumeId },
@@ -619,7 +900,7 @@ router.put("/restore/to/capture/:resumeId", UserAuth, (req, res) => {
         { new: true }
       )
         .then((resumeDoc) =>
-          res.status(200).json({ resumeResotred: true, resumeDoc })
+          res.status(200).json({ resumeRestored: true, resumeDoc })
         )
         .catch((e) => {
           console.error(e);

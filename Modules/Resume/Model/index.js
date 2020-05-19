@@ -28,12 +28,15 @@ const ResumeSchema = new Schema({
       },
     ],
   },
-  editCaptures: [
-    {
-      editDate: Date,
-      capture: this,
-    },
-  ],
+  editCaptures: {
+    type: [
+      {
+        editDate: Date,
+        capture: this,
+      },
+    ],
+    default: [],
+  },
   contactInfo: {
     firstName: {
       type: String,
@@ -57,7 +60,7 @@ const ResumeSchema = new Schema({
       searchable: true,
       validate: {
         validator: (v) => {
-          /^[0-9]*/.test(v);
+          /^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$/.test(v);
         },
       },
     },
@@ -150,8 +153,8 @@ const ResumeSchema = new Schema({
     {
       companyName: String,
       location: String,
-      datesFrom: Date,
-      datesTo: Date,
+      datesFrom: String,
+      datesTo: String,
       dutiesAndTasks: [String],
     },
   ],
@@ -201,7 +204,7 @@ const ResumeSchema = new Schema({
     {
       almaMater: String,
       degree: String,
-      dateEarned: Date,
+      dateEarned: String,
     },
   ],
   certifications: [
@@ -216,14 +219,14 @@ const ResumeSchema = new Schema({
     {
       awardName: String,
       awardCompany: String,
-      dateEarned: Date,
+      dateEarned: String,
     },
   ],
   volunteering: [
     {
       orgName: String,
       tasksCompleted: [String],
-      dates: [Date],
+      dates: [String],
     },
   ],
 });
