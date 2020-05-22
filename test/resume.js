@@ -6,7 +6,7 @@ const signInAndGetToken = require("./firebase").signInAndGetToken;
 const firebase = require("./firebase");
 const chai = require("chai");
 const chaiHttp = require("chai-http");
-const server = require("../server");
+const server = require("../test-server").app;
 const expect = require("chai").expect;
 const admin = require("firebase-admin");
 
