@@ -5,7 +5,7 @@
  */
 
 const { Storage } = require("@google-cloud/storage");
-
+const moment = require("moment");
 exports.uploadFile = async (bucketName, fileName, fileData, contentType) => {
   const storage = new Storage();
 
@@ -17,20 +17,27 @@ exports.uploadFile = async (bucketName, fileName, fileData, contentType) => {
 exports.isFileExist = async (bucketName, fileName) => {
   const storage = new Storage();
 
+  console.log("bucket", bucketName);
+
   const res = await storage.bucket(bucketName).file(fileName).exists();
   return res[0];
 };
 
-exports.getFileUrl = async (bucketName, fileName, expiryHour) => {
+exports.getFileUrl = async (bucketName, fileName) => {
+  const options = {
+    version: "v4",
+    action: "read",
+    expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+  };
   const storage = new Storage();
-
-  return await storage
+  const url = await storage
     .bucket(bucketName)
     .file(fileName)
-    .getSignedUrl({ expires: Date.now() + 1000 * 60 * (60 * expiryHour) });
+    .getSignedUrl(options);  
+  return url[0];
 };
 
-exports.getFileSignedUrl = (bucketName, fileName) => {
+exports._getFileUrl = (bucketName, fileName) => {
   return `https://storage.cloud.google.com/${bucketName}/${fileName}`;
 };
 

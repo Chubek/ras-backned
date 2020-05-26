@@ -42,6 +42,8 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 
 app.use("/resume", require("../modules/resume/route"));
 
+app.use("/render", require("../api/render"));
+
 /*app.get("/", function(req, res) {
 res.sendFile("index.html", { root: path.join(__dirname, "dist") });
 });*/

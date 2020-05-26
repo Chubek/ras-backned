@@ -26,10 +26,13 @@
     "handlebars": "^4.7.3",
     "jsonwebtoken": "^8.5.1",
     "mocha": "^7.1.2",
+    "moment": "^2.26.0",
     "mongoose": "^5.9.13",
     "mongoose-jumblator": "^1.2.3",
     "object-hash": "^2.0.2",
     "puppeteer": "^2.1.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "serverless-google-cloudfunctions": "^2.3.3",
     "uuid": "^8.1.0"
   },

@@ -2,7 +2,6 @@
 
 require("dotenv");
 const mongoose = require("mongoose");
-const jumblator = require("mongoose-jumblator").fieldEncryptionPlugin;
 const Schema = mongoose.Schema;
 const ResumeSchema = new Schema({
   createdInfo: {
@@ -56,8 +55,6 @@ const ResumeSchema = new Schema({
     },
     phoneNumber: {
       type: String,
-      encrypt: true,
-      searchable: true,
       validate: {
         validator: (v) => {
           /^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$/.test(v);
@@ -66,8 +63,6 @@ const ResumeSchema = new Schema({
     },
     emailAddress: {
       type: String,
-      encrypt: true,
-      searchable: true,
       validate: {
         validator: (v) => {
           const pattern = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
@@ -231,9 +226,6 @@ const ResumeSchema = new Schema({
   ],
 });
 
-ResumeSchema.plugin(jumblator, {
-  secret: "T3St4n0w!!##", //use dotenv during production
-});
 
 module.exports =
   mongoose.models.Resume || mongoose.model("Resume", ResumeSchema);

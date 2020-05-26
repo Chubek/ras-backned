@@ -9,15 +9,17 @@ async function gatherContext(resumeId, userId) {
     throw new Error("This resume is not being accessed by the creator.");
   }
 
-  _.forOwn(resume, function (value, key) {
-    if (
-      key !== "createdInfo" &&
-      key !== "templateInfo" &&
-      key !== "editCaptures"
-    ) {
-      context[key] = value;
-    }
-  });
+  context["name"] = resume.createdInfo.resumeName;
+  context["firstName"] = resume.contactInfo.firstName;
+  context["lastName"] = resume.contactInfo.lastName;
+  context["phoneNumber"] = resume.contactInfo.phoneNumber;
+  context["email"] = resume.contactInfo.emailAddress;
+  context["state"] = resume.contactInfo.state;
+  context["city"] = resume.contactInfo.city;
+  context["zipCode"] = resume.contactInfo.zipCode;
+  context["objective"] = resume.summaryObjective.objective;
+  context["bluf"] = resume.summaryObjective.bluf;
+  context["summary"] = resume.summaryObjective.summary;
 
   return context;
 }

@@ -57,8 +57,7 @@ function getToken() {
   });
 }
 
-async function signInAndGetToken(email, password) {
-  setUp();
+async function signInAndGetToken(email, password) {  
   await signIn(email, password);
   return await getToken();
 }

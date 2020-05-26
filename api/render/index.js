@@ -54,8 +54,8 @@ const renderAndSaveResumeOrGetFromCache = async (
     pdfFileName
   );
   const result = {
-    pngUrl: getFileUrl(RENDERED_RESUME_DATA_STORAGE, pngFileName),
-    pdfUrl: getFileUrl(RENDERED_RESUME_DATA_STORAGE, pdfFileName),
+    pngUrl: await getFileUrl(RENDERED_RESUME_DATA_STORAGE, pngFileName),
+    pdfUrl: await getFileUrl(RENDERED_RESUME_DATA_STORAGE, pdfFileName),
   };
 
   if (isExistPng && isExistPdf) {
@@ -120,7 +120,7 @@ router.post("/:templateId/:dummyUserId", (req, res) => {
 app.post("/:resumeId/:templateId", UserAuth, async (req, res) => {
   const userId = req["user-id"];
 
-  const context = gatherContext(req.params.resumeId, userId);
+  const context = await gatherContext(req.params.resumeId, userId);
 
   const result = await renderAndSaveResumeOrGetFromCache(
     req.params.templateId,
