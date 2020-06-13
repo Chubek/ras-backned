@@ -3,6 +3,8 @@
 require("dotenv");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const moment = require("moment");
+
 const ResumeSchema = new Schema({
   createdInfo: {
     userId: String,
@@ -148,8 +150,25 @@ const ResumeSchema = new Schema({
     {
       companyName: String,
       location: String,
-      datesFrom: String,
-      datesTo: String,
+      datesFrom: {
+        type: String,
+        validate: {
+          validator: (v) => {
+            /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v);
+          },
+        },
+      },
+      datesTo: {
+        type: String,
+        validate: {
+          validator: (v) => {
+            /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v);
+          },
+          isLarger: (v) => {
+            return moment().isSameOrAfter(this.datesFrom);
+          },
+        },
+      },
       dutiesAndTasks: [String],
     },
   ],
@@ -199,15 +218,39 @@ const ResumeSchema = new Schema({
     {
       almaMater: String,
       degree: String,
-      dateEarned: String,
+      dateEarned: {
+        type: String,
+        validate: {
+          validator: (v) => {
+            /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v);
+          },
+        },
+      },
     },
   ],
   certifications: [
     {
       certName: String,
       grantedBy: String,
-      dateEarned: String,
-      dateExpires: String,
+      dateEarned: {
+        type: String,
+        validate: {
+          validator: (v) => {
+            /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v);
+          },
+        },
+      },
+      dateExpires: {
+        type: String,
+        validate: {
+          validator: (v) => {
+            /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v);
+          },
+          isLarger: (v) => {
+            return moment().isSameOrAfter(this.dateEarned);
+          },
+        },
+      },
     },
   ],
   awardsAchievements: [
@@ -221,11 +264,17 @@ const ResumeSchema = new Schema({
     {
       orgName: String,
       tasksCompleted: [String],
-      dates: [String],
+      dates: {
+        type: [String],
+        validate: {
+          validator: (v) => {
+            /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v);
+          },
+        },
+      },
     },
   ],
 });
-
 
 module.exports =
   mongoose.models.Resume || mongoose.model("Resume", ResumeSchema);
