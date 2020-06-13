@@ -8,7 +8,7 @@
 require("dotenv").config();
 const render = require("./api/render");
 const assets = require("./api/assets");
-const app = require("./server/server-prod");
+const app = require("./server/server-dev");
 
 exports.render = render;
 exports.assets = assets;
