@@ -29,7 +29,7 @@ app.use(
 );
 
 mongoose
-  .connect("mongodb://localhost:27017/resume-as-service", {
+  .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
@@ -48,7 +48,7 @@ app.use("/render", require("../api/render"));
 res.sendFile("index.html", { root: path.join(__dirname, "dist") });
 });*/
 
-const port = 8000;
+const port = process.env.PORT;
 
 app.listen(port, () =>
   console.log(`Server started on port ${port}`.blue.inverse)
