@@ -8,7 +8,8 @@
     "mocha": "mocha --timeout 50000 --reporter mochawesome",
     "marge": "marge",
     "plop": "plop",
-    "dev": "nodemon server/server-dev.js"
+    "dev": "nodemon server/server-dev.js",
+    "start": "node index.js"
   },
   "author": "Ilia Pirozhenko <ilia@ipirozhenko.com>",
   "license": "UNLICENSED",
