@@ -40,7 +40,7 @@ mongoose.set("useFindAndModify", false);
 
 app.use("/public", express.static(path.join(__dirname, "public")));
 
-app.use("/resume", require("../modules/resume/route"));
+app.use("/resume", require("../Modules/Resume/Route"));
 
 app.use("/render", require("../api/render"));
 
