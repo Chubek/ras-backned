@@ -1,4 +1,4 @@
-const Resume = require("../../../modules/resume/model");
+const Resume = require("../../../Modules/Resume/Model");
 const _ = require("lodash");
 
 async function gatherContext(resumeId, userId) {
