@@ -34,7 +34,7 @@ const gatherContext = require("./gatherContext").gatherContext;
 const { RENDERED_RESUME_DATA_STORAGE } = process.env;
 const app = express();
 
-const Resume = require("../../modules/resume/model");
+const Resume = require("../../Modules/Resume/Model");
 
 const renderAndSaveResumeOrGetFromCache = async (
   templateId,
