@@ -27,7 +27,7 @@
     "handlebars": "^4.7.3",
     "jsonwebtoken": "^8.5.1",
     "mocha": "^7.1.2",
-    "moment": "^2.26.0",
+    "moment": "^2.29.2",
     "mongoose": "^5.9.13",
     "mongoose-jumblator": "^1.2.3",
     "object-hash": "^2.0.2",
